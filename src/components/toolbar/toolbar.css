@@ -1,0 +1,337 @@
+/* ============================================================
+   Toolbar — Rocket League HUD Style
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap");
+
+.rl-toolbar {
+  --_accent: #00aaff;
+  --_bg: rgba(8, 12, 28, 0.92);
+  --_border: rgba(0, 170, 255, 0.25);
+  --_text: rgba(220, 230, 255, 0.95);
+  --_muted: rgba(0, 200, 255, 0.5);
+
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 20px;
+
+  background: linear-gradient(135deg, var(--_bg), rgba(12, 18, 40, 0.88));
+  border: 1px solid var(--_border);
+  backdrop-filter: blur(14px);
+  font-family: "Rajdhani", sans-serif;
+
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+
+  box-shadow:
+    0 0 30px rgba(0, 170, 255, 0.15),
+    0 4px 20px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  animation: toolbar-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes toolbar-enter {
+  from {
+    opacity: 0;
+    translate: -50% -20px;
+  }
+  to {
+    opacity: 1;
+    translate: -50% 0;
+  }
+}
+
+/* scanline overlay */
+.rl-toolbar__scanline {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.015) 2px,
+    rgba(255, 255, 255, 0.015) 4px
+  );
+  pointer-events: none;
+}
+
+/* groups */
+.rl-toolbar__group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.rl-toolbar__label {
+  font-family: "Orbitron", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--_muted);
+  text-transform: uppercase;
+}
+
+.rl-toolbar__buttons {
+  display: flex;
+  gap: 4px;
+}
+
+/* button base */
+.rl-toolbar__btn {
+  position: relative;
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--_text);
+  font-family: "Rajdhani", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  clip-path: polygon(
+    0 0,
+    calc(100% - 6px) 0,
+    100% 6px,
+    100% 100%,
+    6px 100%,
+    0 calc(100% - 6px)
+  );
+}
+
+.rl-toolbar__btn:hover:not(:disabled) {
+  background: rgba(0, 170, 255, 0.12);
+  border-color: rgba(0, 170, 255, 0.3);
+  text-shadow: 0 0 8px rgba(0, 170, 255, 0.5);
+}
+
+.rl-toolbar__btn--active {
+  background: rgba(0, 170, 255, 0.18) !important;
+  border-color: rgba(0, 170, 255, 0.5) !important;
+  color: #00aaff;
+  text-shadow: 0 0 10px rgba(0, 170, 255, 0.6);
+  box-shadow:
+    0 0 12px rgba(0, 170, 255, 0.2),
+    inset 0 0 8px rgba(0, 170, 255, 0.08);
+}
+
+.rl-toolbar__btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.rl-toolbar__btn--danger:hover:not(:disabled) {
+  background: rgba(255, 69, 0, 0.15);
+  border-color: rgba(255, 69, 0, 0.4);
+  color: #ff4500;
+  text-shadow: 0 0 8px rgba(255, 69, 0, 0.5);
+}
+
+/* size dot inside size buttons */
+.rl-toolbar__btn--size {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  min-width: 32px;
+}
+
+.rl-toolbar__size-dot {
+  display: block;
+  border-radius: 50%;
+  background: var(--_text);
+}
+
+/* color swatches */
+.rl-toolbar__colors {
+  display: flex;
+  gap: 4px;
+}
+
+.rl-toolbar__color {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--swatch-color);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--swatch-color) 40%, transparent);
+}
+
+.rl-toolbar__color:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--swatch-color) 60%, transparent);
+}
+
+.rl-toolbar__color--active {
+  border-color: #fff;
+  box-shadow:
+    0 0 14px color-mix(in srgb, var(--swatch-color) 70%, transparent),
+    0 0 4px #fff;
+  transform: scale(1.1);
+}
+
+/* hide file input */
+.rl-toolbar__file-input {
+  display: none;
+}
+
+/* drag handle */
+.rl-toolbar__drag-handle {
+  cursor: grab;
+  padding: 2px 6px;
+  font-size: 16px;
+  color: rgba(0, 200, 255, 0.35);
+  user-select: none;
+  transition: color 0.15s;
+  line-height: 1;
+}
+
+.rl-toolbar__drag-handle:hover {
+  color: rgba(0, 200, 255, 0.7);
+}
+
+.rl-toolbar__drag-handle:active {
+  cursor: grabbing;
+  color: #00aaff;
+}
+
+/* exit draw mode button */
+.rl-toolbar__btn--exit:hover:not(:disabled) {
+  background: rgba(255, 69, 0, 0.15);
+  border-color: rgba(255, 69, 0, 0.4);
+  color: #ff4500;
+  text-shadow: 0 0 8px rgba(255, 69, 0, 0.5);
+}
+
+/* on/off toggle */
+.rl-toolbar__btn--on {
+  background: rgba(0, 255, 136, 0.15) !important;
+  border-color: rgba(0, 255, 136, 0.45) !important;
+  color: #00ff88;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+}
+
+.rl-toolbar__btn--on:hover:not(:disabled) {
+  background: rgba(0, 255, 136, 0.25) !important;
+  border-color: rgba(0, 255, 136, 0.6) !important;
+}
+
+.rl-toolbar__btn--off {
+  opacity: 0.6;
+}
+
+.rl-toolbar__btn--off:hover:not(:disabled) {
+  background: rgba(0, 170, 255, 0.12);
+  border-color: rgba(0, 170, 255, 0.3);
+  opacity: 1;
+}
+
+/* hide toolbar button */
+.rl-toolbar__btn--hide:hover:not(:disabled) {
+  background: rgba(255, 69, 0, 0.15);
+  border-color: rgba(255, 69, 0, 0.4);
+  color: #ff4500;
+  text-shadow: 0 0 8px rgba(255, 69, 0, 0.5);
+}
+
+/* settings button */
+.rl-toolbar__btn--settings {
+  font-size: 15px;
+  padding: 4px 10px;
+}
+
+.rl-toolbar__btn--settings:hover:not(:disabled) {
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  border-color: rgba(255, 215, 0, 0.4);
+}
+
+/* mode indicator */
+.rl-toolbar__mode {
+  font-family: "Orbitron", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #00aaff;
+  text-shadow: 0 0 10px rgba(0, 170, 255, 0.6);
+  animation: mode-pulse 2s ease-in-out infinite;
+}
+
+.rl-toolbar__hint {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(0, 200, 255, 0.35);
+  letter-spacing: 1px;
+}
+
+@keyframes mode-pulse {
+  0%,
+  100% {
+    text-shadow: 0 0 10px rgba(0, 170, 255, 0.4);
+  }
+  50% {
+    text-shadow: 0 0 18px rgba(0, 170, 255, 0.8);
+  }
+}
+
+/* ============================================================
+   Vertical Layout
+   ============================================================ */
+
+.rl-toolbar--vertical {
+  flex-direction: column;
+  top: 50%;
+  left: 16px;
+  translate: 0 -50%;
+  padding: 16px 10px;
+  gap: 12px;
+}
+
+.rl-toolbar--vertical .rl-toolbar__group {
+  flex-direction: column;
+}
+
+.rl-toolbar--vertical .rl-toolbar__buttons {
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rl-toolbar--vertical .rl-toolbar__colors {
+  flex-wrap: wrap;
+  max-width: 80px;
+  justify-content: center;
+}
+
+@keyframes toolbar-enter-vertical {
+  from {
+    opacity: 0;
+    translate: -20px -50%;
+  }
+  to {
+    opacity: 1;
+    translate: 0 -50%;
+  }
+}
+
+.rl-toolbar--vertical {
+  animation-name: toolbar-enter-vertical;
+}

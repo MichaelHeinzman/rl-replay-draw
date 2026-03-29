@@ -1,0 +1,49 @@
+{
+  "name": "rl-replay-draw",
+  "version": "0.1.0",
+  "private": true,
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "build": "vite build",
+    "package": "vite build && electron-builder --win --dir",
+    "start": "electron ."
+  },
+  "build": {
+    "appId": "com.michaelheinzman.rl-replay-draw",
+    "productName": "RL Replay Draw",
+    "win": {
+      "target": "dir",
+      "signAndEditExecutable": false,
+      "icon": "build/icon.ico"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "build/icon.ico"
+    ],
+    "directories": {
+      "output": "release"
+    }
+  },
+  "dependencies": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4",
+    "concurrently": "^9",
+    "electron": "^33",
+    "electron-builder": "^25",
+    "jsdom": "^29.0.1",
+    "typescript": "^5",
+    "vite": "^6",
+    "vitest": "^4.1.2",
+    "wait-on": "^8"
+  }
+}
