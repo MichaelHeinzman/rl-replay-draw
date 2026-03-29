@@ -8,10 +8,17 @@ const {
 const path = require("path");
 const fs = require("fs");
 
+if (process.platform === "win32") {
+  app.setAppUserModelId("com.michaelheinzman.rl-replay-draw");
+}
+
 let mainWindow = null;
 let drawMode = false;
 
 const isDev = !app.isPackaged;
+const iconPath = isDev
+  ? path.join(__dirname, "..", "build", "icon.ico")
+  : path.join(process.resourcesPath, "build", "icon.ico");
 
 /* ── Settings persistence ── */
 
@@ -101,7 +108,7 @@ function createWindow() {
     resizable: false,
     fullscreenable: false,
     backgroundColor: "#00000000",
-    icon: path.join(__dirname, "..", "build", "icon.ico"),
+    icon: iconPath,
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,

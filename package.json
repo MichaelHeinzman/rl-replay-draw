@@ -6,21 +6,25 @@
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build": "vite build",
-    "package": "vite build && electron-builder --win --dir",
+    "package": "set CSC_IDENTITY_AUTO_DISCOVERY=false && vite build && electron-builder --win --dir",
     "start": "electron ."
   },
   "build": {
     "appId": "com.michaelheinzman.rl-replay-draw",
     "productName": "RL Replay Draw",
     "win": {
-      "target": "dir",
-      "signAndEditExecutable": false,
       "icon": "build/icon.ico"
     },
     "files": [
       "dist/**/*",
       "electron/**/*",
       "build/icon.ico"
+    ],
+    "extraResources": [
+      {
+        "from": "build/icon.ico",
+        "to": "build/icon.ico"
+      }
     ],
     "directories": {
       "output": "release"
@@ -41,6 +45,9 @@
     "electron": "^33",
     "electron-builder": "^25",
     "jsdom": "^29.0.1",
+    "png-to-ico": "^3.0.1",
+    "rcedit": "^5.0.2",
+    "sharp": "^0.34.5",
     "typescript": "^5",
     "vite": "^6",
     "vitest": "^4.1.2",
