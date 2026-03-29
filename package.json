@@ -3,17 +3,31 @@
   "version": "0.1.0",
   "private": true,
   "main": "electron/main.cjs",
+  "description": "Draw on screen over Rocket League replays",
+  "author": "Michael Heinzman",
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build": "vite build",
     "package": "set CSC_IDENTITY_AUTO_DISCOVERY=false && vite build && electron-builder --win --dir",
+    "publish": "set CSC_IDENTITY_AUTO_DISCOVERY=false && vite build && electron-builder --win --publish always",
     "start": "electron ."
   },
   "build": {
     "appId": "com.michaelheinzman.rl-replay-draw",
     "productName": "RL Replay Draw",
     "win": {
+      "target": "nsis",
       "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "MichaelHeinzman",
+      "repo": "rl-replay-draw"
     },
     "files": [
       "dist/**/*",
@@ -31,6 +45,7 @@
     }
   },
   "dependencies": {
+    "electron-updater": "^6.8.3",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },

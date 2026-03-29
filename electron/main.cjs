@@ -7,6 +7,7 @@ const {
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
+const { autoUpdater } = require("electron-updater");
 
 if (process.platform === "win32") {
   app.setAppUserModelId("com.michaelheinzman.rl-replay-draw");
@@ -156,6 +157,11 @@ app.whenReady().then(() => {
   settings = loadSettings();
   createWindow();
   registerToggleShortcut();
+
+  // Auto-update (silent — downloads and installs on next restart)
+  if (!isDev) {
+    autoUpdater.checkForUpdatesAndNotify();
+  }
 
   // IPC: renderer can request draw mode changes
   ipcMain.on("exit-draw-mode", () => {
