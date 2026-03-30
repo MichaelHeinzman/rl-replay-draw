@@ -233,3 +233,63 @@
   border-color: rgba(0, 170, 255, 0.6);
   box-shadow: 0 0 12px rgba(0, 170, 255, 0.2);
 }
+
+/* Layout selector — 3×3 grid */
+.rl-settings__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 140px;
+  margin: 0 auto;
+}
+
+.rl-settings__grid-row {
+  display: flex;
+  gap: 4px;
+}
+
+.rl-settings__grid-cell {
+  flex: 1;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-radius: 3px;
+}
+
+.rl-settings__grid-cell:hover {
+  background: rgba(0, 170, 255, 0.1);
+  border-color: rgba(0, 170, 255, 0.3);
+}
+
+.rl-settings__grid-cell--active {
+  background: rgba(0, 170, 255, 0.2) !important;
+  border-color: rgba(0, 170, 255, 0.6) !important;
+  box-shadow: 0 0 10px rgba(0, 170, 255, 0.25);
+}
+
+.rl-settings__grid-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(220, 230, 255, 0.25);
+  transition: all 0.15s ease;
+}
+
+.rl-settings__grid-cell--active .rl-settings__grid-dot {
+  background: #00aaff;
+  box-shadow: 0 0 8px rgba(0, 170, 255, 0.6);
+}
+
+.rl-settings__grid-hint {
+  display: block;
+  text-align: center;
+  margin-top: 8px;
+  font-size: 11px;
+  color: rgba(0, 200, 255, 0.35);
+  letter-spacing: 0.3px;
+}

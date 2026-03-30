@@ -188,6 +188,57 @@
   transform: scale(1.1);
 }
 
+/* Add-color "+" swatch */
+.rl-toolbar__color--add {
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  color: rgba(220, 230, 255, 0.6);
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+}
+
+.rl-toolbar__color--add:hover:not(:disabled) {
+  border-color: rgba(0, 170, 255, 0.5);
+  color: #00aaff;
+}
+
+/* Inline color picker */
+.rl-toolbar__color-picker {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.rl-toolbar__color-input {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.rl-toolbar__color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.rl-toolbar__color-input::-webkit-color-swatch {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+/* Tiny confirm/cancel buttons next to color picker */
+.rl-toolbar__btn--tiny {
+  padding: 2px 6px !important;
+  font-size: 11px !important;
+  min-width: auto !important;
+}
+
 /* hide file input */
 .rl-toolbar__file-input {
   display: none;
@@ -299,9 +350,6 @@
 
 .rl-toolbar--vertical {
   flex-direction: column;
-  top: 50%;
-  left: 16px;
-  translate: 0 -50%;
   padding: 16px 10px;
   gap: 12px;
 }
@@ -321,14 +369,76 @@
   justify-content: center;
 }
 
+/* ============================================================
+   Grid Position Classes
+   ============================================================ */
+
+/* --- Top row (horizontal) --- */
+.rl-toolbar--grid-top-left {
+  top: 16px;
+  left: 16px;
+  translate: none;
+}
+.rl-toolbar--grid-top-center {
+  top: 16px;
+  left: 50%;
+  translate: -50% 0;
+}
+.rl-toolbar--grid-top-right {
+  top: 16px;
+  left: auto;
+  right: 16px;
+  translate: none;
+}
+
+/* --- Middle row --- */
+.rl-toolbar--grid-middle-left {
+  top: 50%;
+  left: 16px;
+  translate: 0 -50%;
+}
+.rl-toolbar--grid-middle-center {
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+}
+.rl-toolbar--grid-middle-right {
+  top: 50%;
+  left: auto;
+  right: 16px;
+  translate: 0 -50%;
+}
+
+/* --- Bottom row --- */
+.rl-toolbar--grid-bottom-left {
+  top: auto;
+  bottom: 16px;
+  left: 16px;
+  translate: none;
+}
+.rl-toolbar--grid-bottom-center {
+  top: auto;
+  bottom: 16px;
+  left: 50%;
+  translate: -50% 0;
+}
+.rl-toolbar--grid-bottom-right {
+  top: auto;
+  bottom: 16px;
+  left: auto;
+  right: 16px;
+  translate: none;
+}
+
+/* Grid entry animations */
 @keyframes toolbar-enter-vertical {
   from {
     opacity: 0;
-    translate: -20px -50%;
+    transform: translateX(-20px);
   }
   to {
     opacity: 1;
-    translate: 0 -50%;
+    transform: translateX(0);
   }
 }
 

@@ -3,7 +3,14 @@ export interface Point {
   y: number;
 }
 
-export type Tool = "freehand" | "line" | "rectangle" | "circle" | "arrow";
+export type Tool =
+  | "freehand"
+  | "line"
+  | "rectangle"
+  | "circle"
+  | "arrow"
+  | "note"
+  | "image";
 
 interface BaseShape {
   id: string;
@@ -49,6 +56,27 @@ export type Shape =
   | RectangleShape
   | CircleShape
   | ArrowShape;
+
+export interface Note {
+  id: string;
+  text: string;
+  x: number;
+  y: number;
+  color: string;
+  fontSize: number;
+  createdAt: number;
+}
+
+export interface PlacedImage {
+  id: string;
+  /** data: URL or file path */
+  src: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  createdAt: number;
+}
 
 export interface Particle {
   x: number;

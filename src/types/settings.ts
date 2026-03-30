@@ -17,9 +17,28 @@ export interface ToolbarPosition {
   y: number;
 }
 
+export type ToolbarLayout = "horizontal" | "vertical";
+
+export type GridRow = "top" | "middle" | "bottom";
+export type GridCol = "left" | "center" | "right";
+
+export interface ToolbarGridPosition {
+  row: GridRow;
+  col: GridCol;
+}
+
+/** Derive orientation from the grid cell: side columns → vertical, otherwise → horizontal. */
+export function gridToLayout(grid: ToolbarGridPosition): ToolbarLayout {
+  return grid.col === "left" || grid.col === "right"
+    ? "vertical"
+    : "horizontal";
+}
+
 export interface AppSettings {
   keyBinds: KeyBinds;
   toolbarPosition: ToolbarPosition | null;
+  toolbarGrid: ToolbarGridPosition;
+  customColors: string[];
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -35,6 +54,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
     redo: "ctrl+y",
   },
   toolbarPosition: null,
+  toolbarGrid: { row: "top", col: "center" },
+  customColors: [],
 };
 
 export const KEYBIND_LABELS: Record<keyof KeyBinds, string> = {

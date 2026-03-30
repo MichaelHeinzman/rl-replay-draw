@@ -108,6 +108,8 @@ export function useDrawing() {
         case "arrow":
           shape = { ...base, tool: "arrow", start: point, end: point };
           break;
+        default:
+          return;
       }
 
       currentShapeRef.current = shape;

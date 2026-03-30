@@ -1,10 +1,20 @@
-import { useRef, useState, useCallback, useEffect, PointerEvent } from "react";
+import {
+  useRef,
+  useState,
+  useCallback,
+  PointerEvent,
+  ChangeEvent,
+} from "react";
 import { Tool } from "../../types/drawing";
 import { COLOR_PALETTE } from "../../lib/theme";
-import { ToolbarPosition, KeyBinds } from "../../types/settings";
+import { gridToLayout, KeyBinds } from "../../types/settings";
+import { useSettingsContext } from "../../contexts/SettingsContext";
+import { useDrawModeContext } from "../../contexts/DrawModeContext";
+import { useDrawingContext } from "../../contexts/DrawingContext";
+import { useOverlayContext } from "../../contexts/OverlayContext";
 import "./toolbar.css";
 
-const TOOLS: { id: Tool; label: string; bindKey: keyof KeyBinds }[] = [
+const DRAW_TOOLS: { id: Tool; label: string; bindKey: keyof KeyBinds }[] = [
   { id: "freehand", label: "Freehand", bindKey: "toolFreehand" },
   { id: "line", label: "Line", bindKey: "toolLine" },
   { id: "rectangle", label: "Rect", bindKey: "toolRectangle" },
@@ -13,29 +23,6 @@ const TOOLS: { id: Tool; label: string; bindKey: keyof KeyBinds }[] = [
 ];
 
 const WIDTHS = [2, 3, 5, 8];
-
-interface ToolbarProps {
-  activeTool: Tool;
-  activeColor: string;
-  strokeWidth: number;
-  canUndo: boolean;
-  canRedo: boolean;
-  keyBinds: KeyBinds;
-  position: ToolbarPosition | null;
-  drawMode: boolean;
-  onToolChange: (tool: Tool) => void;
-  onColorChange: (color: string) => void;
-  onStrokeWidthChange: (w: number) => void;
-  onUndo: () => void;
-  onRedo: () => void;
-  onClear: () => void;
-  onToggleDraw: () => void;
-  onHide: () => void;
-  onOpenSettings: () => void;
-  onPositionChange: (pos: ToolbarPosition | null) => void;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
-}
 
 function formatKey(key: string): string {
   return key
@@ -47,43 +34,60 @@ function formatKey(key: string): string {
     .join("+");
 }
 
-export default function Toolbar({
-  activeTool,
-  activeColor,
-  strokeWidth,
-  canUndo,
-  canRedo,
-  keyBinds,
-  position,
-  drawMode,
-  onToolChange,
-  onColorChange,
-  onStrokeWidthChange,
-  onUndo,
-  onRedo,
-  onClear,
-  onToggleDraw,
-  onHide,
-  onOpenSettings,
-  onPositionChange,
-  onMouseEnter,
-  onMouseLeave,
-}: ToolbarProps) {
+export default function Toolbar() {
+  const { settings, addCustomColor, removeCustomColor, setToolbarPosition } =
+    useSettingsContext();
+  const {
+    drawMode,
+    toggleDraw,
+    hideToolbar,
+    setShowSettings,
+    handleToolbarMouseEnter,
+    handleToolbarMouseLeave,
+  } = useDrawModeContext();
+  const {
+    activeTool,
+    activeColor,
+    strokeWidth,
+    canUndo,
+    canRedo,
+    setActiveTool,
+    setActiveColor,
+    setStrokeWidth,
+    undo,
+    redo,
+    clear,
+  } = useDrawingContext();
+  const { addNote, addImage } = useOverlayContext();
+
+  const keyBinds = settings.keyBinds;
+  const layout = gridToLayout(settings.toolbarGrid);
+  const position = settings.toolbarPosition;
+  const customColors = settings.customColors;
+
   const toolbarRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
-  const [vertical, setVertical] = useState(false);
+  const colorInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [pendingColor, setPendingColor] = useState("#ffffff");
 
-  // Apply position via inline style
+  const vertical = layout === "vertical";
+  const allColors = [...COLOR_PALETTE, ...customColors];
+
+  // Grid-based CSS class when no drag position override
+  const gridClass = !position
+    ? `rl-toolbar--grid-${settings.toolbarGrid.row}-${settings.toolbarGrid.col}`
+    : "";
+
   const posStyle: React.CSSProperties = position
     ? { left: position.x, top: position.y, translate: "none" }
     : {};
 
   const handleDragStart = useCallback((e: PointerEvent<HTMLDivElement>) => {
-    // Only drag on the handle area
     const target = e.target as HTMLElement;
     if (!target.classList.contains("rl-toolbar__drag-handle")) return;
-
     dragging.current = true;
     const rect = toolbarRef.current!.getBoundingClientRect();
     dragOffset.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
@@ -93,11 +97,12 @@ export default function Toolbar({
   const handleDragMove = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
       if (!dragging.current) return;
-      const x = e.clientX - dragOffset.current.x;
-      const y = e.clientY - dragOffset.current.y;
-      onPositionChange({ x, y });
+      setToolbarPosition({
+        x: e.clientX - dragOffset.current.x,
+        y: e.clientY - dragOffset.current.y,
+      });
     },
-    [onPositionChange],
+    [setToolbarPosition],
   );
 
   const handleDragEnd = useCallback(() => {
@@ -105,18 +110,41 @@ export default function Toolbar({
   }, []);
 
   const handleResetPosition = useCallback(() => {
-    onPositionChange(null);
-  }, [onPositionChange]);
+    setToolbarPosition(null);
+  }, [setToolbarPosition]);
+
+  const handleAddColor = () => {
+    if (pendingColor && !allColors.includes(pendingColor)) {
+      addCustomColor(pendingColor);
+      setActiveColor(pendingColor);
+    }
+    setShowColorPicker(false);
+  };
+
+  const handleImageFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        addImage(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleAddNote = () => addNote(activeColor);
 
   return (
     <div
       ref={toolbarRef}
-      className={`rl-toolbar ${vertical ? "rl-toolbar--vertical" : ""}`}
+      className={`rl-toolbar ${vertical ? "rl-toolbar--vertical" : ""} ${gridClass}`}
       style={posStyle}
       onPointerMove={handleDragMove}
       onPointerUp={handleDragEnd}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      onMouseEnter={handleToolbarMouseEnter}
+      onMouseLeave={handleToolbarMouseLeave}
     >
       <div className="rl-toolbar__scanline" />
 
@@ -135,7 +163,7 @@ export default function Toolbar({
         <div className="rl-toolbar__buttons">
           <button
             className={`rl-toolbar__btn ${drawMode ? "rl-toolbar__btn--on" : "rl-toolbar__btn--off"}`}
-            onClick={onToggleDraw}
+            onClick={toggleDraw}
             title={`Toggle Draw (${formatKey(keyBinds.toggleDraw)})`}
           >
             {drawMode ? "✦ On" : "Off"}
@@ -143,15 +171,15 @@ export default function Toolbar({
         </div>
       </div>
 
-      {/* Tools */}
+      {/* Drawing Tools */}
       <div className="rl-toolbar__group">
         <span className="rl-toolbar__label">TOOL</span>
         <div className="rl-toolbar__buttons">
-          {TOOLS.map((t) => (
+          {DRAW_TOOLS.map((t) => (
             <button
               key={t.id}
               className={`rl-toolbar__btn ${activeTool === t.id ? "rl-toolbar__btn--active" : ""}`}
-              onClick={() => onToolChange(t.id)}
+              onClick={() => setActiveTool(t.id)}
               disabled={!drawMode}
               title={`${t.label} (${formatKey(keyBinds[t.bindKey])})`}
             >
@@ -161,24 +189,92 @@ export default function Toolbar({
         </div>
       </div>
 
+      {/* Place Tools — Notes & Images */}
+      <div className="rl-toolbar__group">
+        <span className="rl-toolbar__label">PLACE</span>
+        <div className="rl-toolbar__buttons">
+          <button
+            className="rl-toolbar__btn"
+            onClick={handleAddNote}
+            disabled={!drawMode}
+            title="Add a text note"
+          >
+            📝 Note
+          </button>
+          <button
+            className="rl-toolbar__btn"
+            onClick={() => imageInputRef.current?.click()}
+            disabled={!drawMode}
+            title="Place an image on screen"
+          >
+            🖼️ Image
+          </button>
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*,.svg"
+            className="rl-toolbar__file-input"
+            onChange={handleImageFile}
+          />
+        </div>
+      </div>
+
       {/* Colors */}
       <div className="rl-toolbar__group">
         <span className="rl-toolbar__label">COLOR</span>
         <div className="rl-toolbar__colors">
-          {COLOR_PALETTE.map((c) => (
+          {allColors.map((c) => (
             <button
               key={c}
               className={`rl-toolbar__color ${activeColor === c ? "rl-toolbar__color--active" : ""}`}
-              style={
-                {
-                  "--swatch-color": c,
-                } as React.CSSProperties
-              }
-              onClick={() => onColorChange(c)}
+              style={{ "--swatch-color": c } as React.CSSProperties}
+              onClick={() => setActiveColor(c)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                if (!(COLOR_PALETTE as readonly string[]).includes(c))
+                  removeCustomColor(c);
+              }}
               disabled={!drawMode}
-              title={c}
+              title={
+                (COLOR_PALETTE as readonly string[]).includes(c)
+                  ? c
+                  : `${c} (right-click to remove)`
+              }
             />
           ))}
+          {/* Color picker toggle */}
+          {showColorPicker ? (
+            <div className="rl-toolbar__color-picker">
+              <input
+                ref={colorInputRef}
+                type="color"
+                value={pendingColor}
+                onChange={(e) => setPendingColor(e.target.value)}
+                className="rl-toolbar__color-input"
+              />
+              <button
+                className="rl-toolbar__btn rl-toolbar__btn--tiny"
+                onClick={handleAddColor}
+              >
+                ✓
+              </button>
+              <button
+                className="rl-toolbar__btn rl-toolbar__btn--tiny"
+                onClick={() => setShowColorPicker(false)}
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
+            <button
+              className="rl-toolbar__color rl-toolbar__color--add"
+              onClick={() => setShowColorPicker(true)}
+              disabled={!drawMode}
+              title="Add custom color"
+            >
+              +
+            </button>
+          )}
         </div>
       </div>
 
@@ -190,7 +286,7 @@ export default function Toolbar({
             <button
               key={w}
               className={`rl-toolbar__btn rl-toolbar__btn--size ${strokeWidth === w ? "rl-toolbar__btn--active" : ""}`}
-              onClick={() => onStrokeWidthChange(w)}
+              onClick={() => setStrokeWidth(w)}
               disabled={!drawMode}
             >
               <span
@@ -202,30 +298,29 @@ export default function Toolbar({
         </div>
       </div>
 
-      {/* Actions */}
+      {/* Actions — always enabled */}
       <div className="rl-toolbar__group">
         <span className="rl-toolbar__label">ACTIONS</span>
         <div className="rl-toolbar__buttons">
           <button
             className="rl-toolbar__btn"
-            onClick={onUndo}
-            disabled={!canUndo || !drawMode}
+            onClick={undo}
+            disabled={!canUndo}
             title={`Undo (${formatKey(keyBinds.undo)})`}
           >
             Undo
           </button>
           <button
             className="rl-toolbar__btn"
-            onClick={onRedo}
-            disabled={!canRedo || !drawMode}
+            onClick={redo}
+            disabled={!canRedo}
             title={`Redo (${formatKey(keyBinds.redo)})`}
           >
             Redo
           </button>
           <button
             className="rl-toolbar__btn rl-toolbar__btn--danger"
-            onClick={onClear}
-            disabled={!drawMode}
+            onClick={clear}
             title="Clear All"
           >
             Clear
@@ -233,20 +328,13 @@ export default function Toolbar({
         </div>
       </div>
 
-      {/* Toolbar controls */}
+      {/* Toolbar controls — always enabled */}
       <div className="rl-toolbar__group">
         <span className="rl-toolbar__label">VIEW</span>
         <div className="rl-toolbar__buttons">
           <button
-            className="rl-toolbar__btn"
-            onClick={() => setVertical((v) => !v)}
-            title={vertical ? "Switch to horizontal" : "Switch to vertical"}
-          >
-            {vertical ? "━" : "┃"}
-          </button>
-          <button
             className="rl-toolbar__btn rl-toolbar__btn--hide"
-            onClick={onHide}
+            onClick={hideToolbar}
             title="Hide toolbar"
           >
             ✕
@@ -262,7 +350,7 @@ export default function Toolbar({
           )}
           <button
             className="rl-toolbar__btn rl-toolbar__btn--settings"
-            onClick={onOpenSettings}
+            onClick={() => setShowSettings(true)}
             title="Settings"
           >
             ⚙
