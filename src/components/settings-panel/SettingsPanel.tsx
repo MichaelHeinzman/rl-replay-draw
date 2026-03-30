@@ -1,17 +1,15 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
-  AppSettings,
   KeyBinds,
   KEYBIND_LABELS,
   DEFAULT_SETTINGS,
+  GridRow,
+  GridCol,
+  ToolbarGridPosition,
 } from "../../types/settings";
+import { useSettingsContext } from "../../contexts/SettingsContext";
+import { useDrawModeContext } from "../../contexts/DrawModeContext";
 import "./settings-panel.css";
-
-interface SettingsPanelProps {
-  settings: AppSettings;
-  onSave: (settings: AppSettings) => void;
-  onClose: () => void;
-}
 
 function formatKeyForDisplay(key: string): string {
   return key
@@ -35,7 +33,6 @@ function keyEventToString(e: KeyboardEvent): string {
   if (e.metaKey) parts.push("meta");
 
   const key = e.key;
-  // Don't record modifier-only presses
   if (["Control", "Alt", "Shift", "Meta"].includes(key)) return "";
 
   if (key.length === 1) {
@@ -47,12 +44,17 @@ function keyEventToString(e: KeyboardEvent): string {
   return parts.join("+");
 }
 
-export default function SettingsPanel({
-  settings,
-  onSave,
-  onClose,
-}: SettingsPanelProps) {
+const ROWS: GridRow[] = ["top", "middle", "bottom"];
+const COLS: GridCol[] = ["left", "center", "right"];
+
+export default function SettingsPanel() {
+  const { settings, updateSettings, setToolbarGrid } = useSettingsContext();
+  const { setShowSettings } = useDrawModeContext();
+
   const [draft, setDraft] = useState<KeyBinds>({ ...settings.keyBinds });
+  const [draftGrid, setDraftGrid] = useState<ToolbarGridPosition>(
+    settings.toolbarGrid,
+  );
   const [recording, setRecording] = useState<keyof KeyBinds | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -75,13 +77,21 @@ export default function SettingsPanel({
     return () => window.removeEventListener("keydown", handleRecord, true);
   }, [recording, handleRecord]);
 
+  const onClose = () => setShowSettings(false);
+
   const handleSave = () => {
-    onSave({ ...settings, keyBinds: draft });
+    updateSettings({
+      ...settings,
+      keyBinds: draft,
+      toolbarGrid: draftGrid,
+      toolbarPosition: null,
+    });
     onClose();
   };
 
   const handleReset = () => {
     setDraft({ ...DEFAULT_SETTINGS.keyBinds });
+    setDraftGrid(DEFAULT_SETTINGS.toolbarGrid);
   };
 
   return (
@@ -99,6 +109,34 @@ export default function SettingsPanel({
           </button>
         </div>
 
+        {/* Grid position picker */}
+        <div className="rl-settings__section">
+          <span className="rl-settings__section-title">TOOLBAR POSITION</span>
+          <div className="rl-settings__grid">
+            {ROWS.map((row) => (
+              <div key={row} className="rl-settings__grid-row">
+                {COLS.map((col) => {
+                  const active = draftGrid.row === row && draftGrid.col === col;
+                  return (
+                    <button
+                      key={`${row}-${col}`}
+                      className={`rl-settings__grid-cell ${active ? "rl-settings__grid-cell--active" : ""}`}
+                      onClick={() => setDraftGrid({ row, col })}
+                      title={`${row} ${col}`}
+                    >
+                      <span className="rl-settings__grid-dot" />
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          <span className="rl-settings__grid-hint">
+            Side columns = vertical · Top/bottom rows = horizontal
+          </span>
+        </div>
+
+        {/* Key bindings */}
         <div className="rl-settings__section">
           <span className="rl-settings__section-title">KEY BINDINGS</span>
           <div className="rl-settings__binds">

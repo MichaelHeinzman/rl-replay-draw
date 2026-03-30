@@ -36,6 +36,8 @@ const DEFAULT_SETTINGS = {
     redo: "ctrl+y",
   },
   toolbarPosition: null,
+  toolbarGrid: { row: "top", col: "center" },
+  customColors: [],
 };
 
 function getSettingsPath() {
