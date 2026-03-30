@@ -20,7 +20,9 @@ jobs:
       - name: Read version from package.json
         id: version
         shell: bash
-        run: echo "version=v$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=v${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Check if tag already exists
         id: tag_check
