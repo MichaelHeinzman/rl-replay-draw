@@ -11,12 +11,16 @@ interface ImageOverlayProps {
   image: PlacedImage;
   onUpdate: (id: string, patch: Partial<PlacedImage>) => void;
   onRemove: (id: string) => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 export default function ImageOverlay({
   image,
   onUpdate,
   onRemove,
+  onMouseEnter,
+  onMouseLeave,
 }: ImageOverlayProps) {
   const dragging = useRef(false);
   const resizing = useRef(false);
@@ -86,6 +90,8 @@ export default function ImageOverlay({
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <div className="rl-image__wrapper">
         <img

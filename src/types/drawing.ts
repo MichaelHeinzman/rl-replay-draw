@@ -64,7 +64,15 @@ export interface Note {
   y: number;
   color: string;
   fontSize: number;
+  width: number;
+  height: number;
   createdAt: number;
+  minimized?: boolean;
+  savedFilePath?: string;
+  savedFormat?: "txt" | "md" | "html" | "doc";
+  savedTextSnapshot?: string;
+  lastSavedAt?: number;
+  isSaving?: boolean;
 }
 
 export interface PlacedImage {

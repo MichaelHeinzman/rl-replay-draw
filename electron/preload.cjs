@@ -14,4 +14,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   focusWindow: () => ipcRenderer.send("focus-window"),
   getSettings: () => ipcRenderer.invoke("get-settings"),
   saveSettings: (settings) => ipcRenderer.invoke("save-settings", settings),
+  getNote: () => ipcRenderer.invoke("get-note"),
+  saveNote: (note) => ipcRenderer.invoke("save-note", note),
+  exportNote: (note, format) => ipcRenderer.invoke("export-note", note, format),
+  saveNoteFile: (note, format, filePath) =>
+    ipcRenderer.invoke("save-note-file", note, format, filePath),
+  importNote: () => ipcRenderer.invoke("import-note"),
+  getOverlayNotes: () => ipcRenderer.invoke("get-overlay-notes"),
+  saveOverlayNotes: (notes) => ipcRenderer.invoke("save-overlay-notes", notes),
 });

@@ -4,7 +4,10 @@ import Toolbar from "../Toolbar";
 import { SettingsProvider } from "../../../contexts/SettingsContext";
 import { DrawModeProvider } from "../../../contexts/DrawModeContext";
 import { DrawingProvider } from "../../../contexts/DrawingContext";
-import { OverlayProvider } from "../../../contexts/OverlayContext";
+import {
+  OverlayProvider,
+  useOverlayContext,
+} from "../../../contexts/OverlayContext";
 
 function AllProviders({ children }: { children: ReactNode }) {
   return (
@@ -19,6 +22,10 @@ function AllProviders({ children }: { children: ReactNode }) {
 }
 
 describe("Toolbar", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it("renders the draw toggle button", () => {
     render(<Toolbar />, { wrapper: AllProviders });
     expect(screen.getByText("✦ On")).toBeInTheDocument();
@@ -37,6 +44,24 @@ describe("Toolbar", () => {
     render(<Toolbar />, { wrapper: AllProviders });
     expect(screen.getByText(/Note/)).toBeInTheDocument();
     expect(screen.getByText(/Image/)).toBeInTheDocument();
+  });
+
+  it("creates a new note when the Notes button is clicked", () => {
+    function Harness() {
+      const overlay = useOverlayContext();
+      return (
+        <>
+          <Toolbar />
+          <span data-testid="note-count">{overlay.notes.length}</span>
+        </>
+      );
+    }
+
+    render(<Harness />, { wrapper: AllProviders });
+
+    expect(screen.getByTestId("note-count")).toHaveTextContent("0");
+    fireEvent.click(screen.getByTitle("Create a new note"));
+    expect(screen.getByTestId("note-count")).toHaveTextContent("1");
   });
 
   it("renders undo, redo, and clear action buttons", () => {

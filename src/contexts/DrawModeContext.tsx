@@ -61,7 +61,7 @@ export function DrawModeProvider({ children }: { children: ReactNode }) {
     prevDrawMode.current = drawMode;
   }, [drawMode]);
 
-  // When settings panel is open and draw mode is off, we need to capture
+  // When an overlay panel is open and draw mode is off, we need to capture
   // mouse events so buttons inside the panel are clickable.
   useEffect(() => {
     if (!showSettings || drawMode) return;

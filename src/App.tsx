@@ -35,8 +35,14 @@ function matchesKey(e: KeyboardEvent, bind: string): boolean {
 
 function AppShell() {
   const { settings } = useSettingsContext();
-  const { drawMode, toolbarVisible, showSettings, toggleDraw } =
-    useDrawModeContext();
+  const {
+    drawMode,
+    toolbarVisible,
+    showSettings,
+    toggleDraw,
+    handleToolbarMouseEnter,
+    handleToolbarMouseLeave,
+  } = useDrawModeContext();
   const drawing = useDrawingContext();
   const overlay = useOverlayContext();
 
@@ -81,7 +87,13 @@ function AppShell() {
         }
       }
     },
-    [drawing, drawMode, settings.keyBinds, showSettings, toggleDraw],
+    [
+      drawing,
+      drawMode,
+      settings.keyBinds,
+      showSettings,
+      toggleDraw,
+    ],
   );
 
   useEffect(() => {
@@ -99,6 +111,8 @@ function AppShell() {
           image={img}
           onUpdate={overlay.updateImage}
           onRemove={overlay.removeImage}
+          onMouseEnter={handleToolbarMouseEnter}
+          onMouseLeave={handleToolbarMouseLeave}
         />
       ))}
 
@@ -108,6 +122,8 @@ function AppShell() {
           note={note}
           onUpdate={overlay.updateNote}
           onRemove={overlay.removeNote}
+          onMouseEnter={handleToolbarMouseEnter}
+          onMouseLeave={handleToolbarMouseLeave}
         />
       ))}
 
