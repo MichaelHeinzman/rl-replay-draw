@@ -4,6 +4,9 @@ A transparent desktop overlay for drawing animated shapes on your screen while r
 
 Shapes glow and pulse with the Grover Gang Twitch overlay color palette, and particles burst on completion.
 
+<img width="953" height="534" alt="Screenshot 2026-05-31 133224" src="https://github.com/user-attachments/assets/d3e77e47-2dd5-4f9a-9292-ac801d04526c" />
+<img width="951" height="530" alt="Screenshot 2026-05-31 133154" src="https://github.com/user-attachments/assets/994f9f94-2777-4319-ab35-c445e725e126" />
+
 ## Features
 
 - **Transparent overlay** — sits on top of your game/replay viewer. Clicks pass through when not drawing.
