@@ -1,6 +1,6 @@
 {
   "name": "rl-replay-draw",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "main": "electron/main.cjs",
   "description": "Draw on screen over Rocket League replays",
@@ -8,8 +8,13 @@
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build": "vite build",
+    "test": "vitest run",
     "package": "set CSC_IDENTITY_AUTO_DISCOVERY=false && vite build && electron-builder --win --dir",
+    "package:win": "set CSC_IDENTITY_AUTO_DISCOVERY=false && vite build && electron-builder --win --dir",
+    "package:mac": "CSC_IDENTITY_AUTO_DISCOVERY=false vite build && electron-builder --mac --dir",
     "publish": "set CSC_IDENTITY_AUTO_DISCOVERY=false && vite build && electron-builder --win --publish always",
+    "publish:win": "set CSC_IDENTITY_AUTO_DISCOVERY=false && vite build && electron-builder --win --publish always",
+    "publish:mac": "vite build && electron-builder --mac --publish always",
     "start": "electron ."
   },
   "build": {
@@ -18,6 +23,25 @@
     "win": {
       "target": "nsis",
       "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.icns",
+      "category": "public.app-category.utilities"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     },
     "nsis": {
       "oneClick": true,
@@ -32,7 +56,7 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
-      "build/icon.ico"
+      "build/*.{ico,icns}"
     ],
     "extraResources": [
       {

@@ -12,7 +12,7 @@
   --_muted: rgba(0, 200, 255, 0.5);
 
   position: fixed;
-  top: 16px;
+  top: calc(var(--safe-inset-top, 0px) + 16px);
   left: 50%;
   translate: -50% 0;
   z-index: 100;
@@ -375,26 +375,26 @@
 
 /* --- Top row (horizontal) --- */
 .rl-toolbar--grid-top-left {
-  top: 16px;
-  left: 16px;
+  top: calc(var(--safe-inset-top, 0px) + 16px);
+  left: calc(var(--safe-inset-left, 0px) + 16px);
   translate: none;
 }
 .rl-toolbar--grid-top-center {
-  top: 16px;
+  top: calc(var(--safe-inset-top, 0px) + 16px);
   left: 50%;
   translate: -50% 0;
 }
 .rl-toolbar--grid-top-right {
-  top: 16px;
+  top: calc(var(--safe-inset-top, 0px) + 16px);
   left: auto;
-  right: 16px;
+  right: calc(var(--safe-inset-right, 0px) + 16px);
   translate: none;
 }
 
 /* --- Middle row --- */
 .rl-toolbar--grid-middle-left {
   top: 50%;
-  left: 16px;
+  left: calc(var(--safe-inset-left, 0px) + 16px);
   translate: 0 -50%;
 }
 .rl-toolbar--grid-middle-center {
@@ -405,28 +405,28 @@
 .rl-toolbar--grid-middle-right {
   top: 50%;
   left: auto;
-  right: 16px;
+  right: calc(var(--safe-inset-right, 0px) + 16px);
   translate: 0 -50%;
 }
 
 /* --- Bottom row --- */
 .rl-toolbar--grid-bottom-left {
   top: auto;
-  bottom: 16px;
-  left: 16px;
+  bottom: calc(var(--safe-inset-bottom, 0px) + 16px);
+  left: calc(var(--safe-inset-left, 0px) + 16px);
   translate: none;
 }
 .rl-toolbar--grid-bottom-center {
   top: auto;
-  bottom: 16px;
+  bottom: calc(var(--safe-inset-bottom, 0px) + 16px);
   left: 50%;
   translate: -50% 0;
 }
 .rl-toolbar--grid-bottom-right {
   top: auto;
-  bottom: 16px;
+  bottom: calc(var(--safe-inset-bottom, 0px) + 16px);
   left: auto;
-  right: 16px;
+  right: calc(var(--safe-inset-right, 0px) + 16px);
   translate: none;
 }
 

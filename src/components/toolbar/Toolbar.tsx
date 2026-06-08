@@ -346,6 +346,21 @@ export default function Toolbar() {
           </button>
         </div>
       </div>
+
+      {window.electronAPI && (
+        <div className="rl-toolbar__group">
+          <span className="rl-toolbar__label">APP</span>
+          <div className="rl-toolbar__buttons">
+            <button
+              className="rl-toolbar__btn rl-toolbar__btn--danger"
+              onClick={() => window.electronAPI!.quitApp()}
+              title="Quit RL Replay Draw"
+            >
+              Quit
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

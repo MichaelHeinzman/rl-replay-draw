@@ -16,6 +16,25 @@ import { DrawingProvider, useDrawingContext } from "./contexts/DrawingContext";
 import { OverlayProvider, useOverlayContext } from "./contexts/OverlayContext";
 import { KeyBinds, KEYBIND_TO_TOOL } from "./types/settings";
 
+/** Set CSS custom properties for safe insets based on the OS work area.
+ *  On macOS the work area excludes the menu bar (~28 px top) and Dock.
+ *  These variables are used by the toolbar grid-position classes so the
+ *  toolbar is never hidden behind system UI. */
+function applyDisplayInsets() {
+  if (!window.electronAPI) return;
+  window.electronAPI.getDisplayBounds().then(({ bounds, workArea }) => {
+    const top = workArea.y - bounds.y;
+    const left = workArea.x - bounds.x;
+    const bottom = bounds.y + bounds.height - (workArea.y + workArea.height);
+    const right = bounds.x + bounds.width - (workArea.x + workArea.width);
+    const root = document.documentElement;
+    root.style.setProperty("--safe-inset-top", `${Math.max(top, 0)}px`);
+    root.style.setProperty("--safe-inset-left", `${Math.max(left, 0)}px`);
+    root.style.setProperty("--safe-inset-bottom", `${Math.max(bottom, 0)}px`);
+    root.style.setProperty("--safe-inset-right", `${Math.max(right, 0)}px`);
+  });
+}
+
 function matchesKey(e: KeyboardEvent, bind: string): boolean {
   const parts = bind.toLowerCase().split("+");
   const key = parts[parts.length - 1];
@@ -45,6 +64,12 @@ function AppShell() {
   } = useDrawModeContext();
   const drawing = useDrawingContext();
   const overlay = useOverlayContext();
+
+  // Apply OS-specific safe insets (e.g. macOS menu bar, Dock) so the toolbar
+  // grid positions never render behind system UI.
+  useEffect(() => {
+    applyDisplayInsets();
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -87,13 +112,7 @@ function AppShell() {
         }
       }
     },
-    [
-      drawing,
-      drawMode,
-      settings.keyBinds,
-      showSettings,
-      toggleDraw,
-    ],
+    [drawing, drawMode, settings.keyBinds, showSettings, toggleDraw],
   );
 
   useEffect(() => {

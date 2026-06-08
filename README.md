@@ -55,13 +55,66 @@ npm run build
 
 Builds the renderer with Vite to `dist/`.
 
-### Package (Windows .exe)
+### Package
+
+**Windows (.exe)**
 
 ```bash
-npm run package
+npm run package:win
 ```
 
 Outputs a portable app to `release/win-unpacked/RL Replay Draw.exe`.
+
+**macOS (.app / .dmg)**
+
+```bash
+npm run package:mac
+```
+
+Outputs the app to `release/mac/RL Replay Draw.app`.
+
+> **macOS icon:** Before packaging you need a `build/icon.icns` file. The quickest way to create one from the existing `icon.ico` is to export a 1024×1024 PNG from it and run:
+>
+> ```bash
+> # Using Homebrew's libicns
+> brew install libicns
+> png2icns build/icon.icns your-icon-1024.png
+> ```
+
+---
+
+## Using the App on macOS
+
+Because the overlay is a transparent, click-through window, there is **no Dock icon or taskbar entry** while it is running — this is intentional so it doesn't interfere with your game. Here is how to control it:
+
+### Opening / Launching
+
+- **Development:** run `npm run dev` in the terminal. The invisible overlay starts immediately.
+- **Packaged app:** double-click `RL Replay Draw.app` from Finder or `release/mac/`. The app starts silently in the background.
+
+### Activating draw mode
+
+Press **F2** (default) at any time — even while your game/replay viewer is focused — to toggle the drawing toolbar on screen. The global hotkey works system-wide.
+
+### Closing / Quitting
+
+The overlay has no visible close button on purpose. To quit:
+
+| Method         | How                                                                                     |
+| -------------- | --------------------------------------------------------------------------------------- |
+| **Toolbar**    | Enter draw mode (F2), then click the **✕ Quit** button on the toolbar                   |
+| **Menu bar**   | While the app is active (click its toolbar), use **Cmd+Q** or **RL Replay Draw → Quit** |
+| **Force quit** | Open **Activity Monitor**, find _RL Replay Draw_, and click the stop button             |
+| **Terminal**   | `pkill -f "RL Replay Draw"`                                                             |
+
+> **Tip:** If the toolbar is not visible after pressing F2, press F2 again to toggle draw mode off and on — this always re-shows the toolbar.
+
+### Permissions (first launch)
+
+macOS may require you to grant:
+
+- **Accessibility / Input Monitoring** — so the global F2 hotkey works while another app is in focus. Go to **System Settings → Privacy & Security → Input Monitoring** and add RL Replay Draw.
+- **Screen Recording** — only needed if you use a screen-capture tool alongside the overlay; Electron itself does not capture your screen.
 
 ## Project Structure
 

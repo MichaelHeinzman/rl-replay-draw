@@ -18,9 +18,13 @@ let mainWindow = null;
 let drawMode = false;
 
 const isDev = !app.isPackaged;
-const iconPath = isDev
-  ? path.join(__dirname, "..", "build", "icon.ico")
-  : path.join(process.resourcesPath, "build", "icon.ico");
+// macOS uses the app bundle icon; Windows needs an explicit .ico path
+const iconPath =
+  process.platform === "win32"
+    ? isDev
+      ? path.join(__dirname, "..", "build", "icon.ico")
+      : path.join(process.resourcesPath, "build", "icon.ico")
+    : null;
 
 /* ── Settings persistence ── */
 
@@ -118,7 +122,10 @@ function saveNote(note) {
 function normalizeOverlayNotes(notes) {
   if (!Array.isArray(notes)) return [];
   return notes.map((note, index) => ({
-    id: typeof note.id === "string" && note.id ? note.id : `n${Date.now()}-${index}`,
+    id:
+      typeof note.id === "string" && note.id
+        ? note.id
+        : `n${Date.now()}-${index}`,
     text: typeof note.text === "string" ? note.text : "",
     x: typeof note.x === "number" ? note.x : 0,
     y: typeof note.y === "number" ? note.y : 0,
@@ -216,10 +223,12 @@ function buildNoteHtml(note) {
 }
 
 function safeBaseName(value) {
-  return (value || DEFAULT_NOTE.title)
-    .replace(/[<>:"/\\|?*\x00-\x1f]/g, "")
-    .trim()
-    .slice(0, 80) || DEFAULT_NOTE.title;
+  return (
+    (value || DEFAULT_NOTE.title)
+      .replace(/[<>:"/\\|?*\x00-\x1f]/g, "")
+      .trim()
+      .slice(0, 80) || DEFAULT_NOTE.title
+  );
 }
 
 function getExportPayload(note, format) {
@@ -272,7 +281,8 @@ function registerToggleShortcut() {
 }
 
 function createWindow() {
-  const { width, height } = screen.getPrimaryDisplay().bounds;
+  const display = screen.getPrimaryDisplay();
+  const { width, height } = display.bounds;
 
   mainWindow = new BrowserWindow({
     x: 0,
@@ -286,7 +296,7 @@ function createWindow() {
     resizable: false,
     fullscreenable: false,
     backgroundColor: "#00000000",
-    icon: iconPath,
+    ...(iconPath ? { icon: iconPath } : {}),
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
@@ -294,9 +304,16 @@ function createWindow() {
     },
   });
 
-  // "screen-saver" is the highest z-order level on Windows —
+  // "screen-saver" is the highest z-order level on both Windows and macOS —
   // required to render above borderless-fullscreen games.
   mainWindow.setAlwaysOnTop(true, "screen-saver");
+
+  // macOS: ensure the overlay appears on all Spaces, including full-screen apps
+  if (process.platform === "darwin") {
+    mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    // Force the window to truly cover the full screen (macOS may clamp to workArea)
+    mainWindow.setBounds({ x: 0, y: 0, width, height });
+  }
 
   // Start in passthrough mode — clicks go through to apps below
   mainWindow.setIgnoreMouseEvents(true, { forward: true });
@@ -337,8 +354,13 @@ app.whenReady().then(() => {
   registerToggleShortcut();
 
   // Auto-update (silent — downloads and installs on next restart)
+  // macOS auto-updates require a code-signed build; skip gracefully without one
   if (!isDev) {
-    autoUpdater.checkForUpdatesAndNotify();
+    try {
+      autoUpdater.checkForUpdatesAndNotify();
+    } catch (e) {
+      console.error("Auto-update check failed:", e);
+    }
   }
 
   // IPC: renderer can request draw mode changes
@@ -400,32 +422,43 @@ app.whenReady().then(() => {
       return { canceled: true };
     }
 
-    fs.writeFileSync(result.filePath, getExportPayload(normalized, format), "utf-8");
+    fs.writeFileSync(
+      result.filePath,
+      getExportPayload(normalized, format),
+      "utf-8",
+    );
     return { canceled: false, filePath: result.filePath };
   });
 
-  ipcMain.handle("save-note-file", async (_event, noteToSave, format, filePath) => {
-    const normalized = normalizeNote(noteToSave);
-    const extension = format === "doc" ? "doc" : format || "txt";
-    let targetPath = filePath;
+  ipcMain.handle(
+    "save-note-file",
+    async (_event, noteToSave, format, filePath) => {
+      const normalized = normalizeNote(noteToSave);
+      const extension = format === "doc" ? "doc" : format || "txt";
+      let targetPath = filePath;
 
-    if (!targetPath) {
-      const result = await dialog.showSaveDialog(mainWindow, {
-        title: "Save note",
-        defaultPath: `${safeBaseName(normalized.title)}.${extension}`,
-        filters: getExportFilters(format),
-      });
+      if (!targetPath) {
+        const result = await dialog.showSaveDialog(mainWindow, {
+          title: "Save note",
+          defaultPath: `${safeBaseName(normalized.title)}.${extension}`,
+          filters: getExportFilters(format),
+        });
 
-      if (result.canceled || !result.filePath) {
-        return { canceled: true };
+        if (result.canceled || !result.filePath) {
+          return { canceled: true };
+        }
+
+        targetPath = result.filePath;
       }
 
-      targetPath = result.filePath;
-    }
-
-    fs.writeFileSync(targetPath, getExportPayload(normalized, format), "utf-8");
-    return { canceled: false, filePath: targetPath };
-  });
+      fs.writeFileSync(
+        targetPath,
+        getExportPayload(normalized, format),
+        "utf-8",
+      );
+      return { canceled: false, filePath: targetPath };
+    },
+  );
 
   ipcMain.handle("import-note", async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
@@ -465,6 +498,15 @@ app.whenReady().then(() => {
   ipcMain.handle("save-overlay-notes", (_event, notesToSave) =>
     saveOverlayNotes(notesToSave),
   );
+
+  ipcMain.handle("get-display-bounds", () => {
+    const d = screen.getPrimaryDisplay();
+    return { bounds: d.bounds, workArea: d.workArea };
+  });
+
+  ipcMain.on("quit-app", () => {
+    app.quit();
+  });
 });
 
 app.on("will-quit", () => {

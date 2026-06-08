@@ -25,6 +25,11 @@ interface ElectronAPI {
   importNote: () => Promise<NoteFileResult>;
   getOverlayNotes: () => Promise<Note[]>;
   saveOverlayNotes: (notes: Note[]) => Promise<Note[]>;
+  getDisplayBounds: () => Promise<{
+    bounds: { x: number; y: number; width: number; height: number };
+    workArea: { x: number; y: number; width: number; height: number };
+  }>;
+  quitApp: () => void;
 }
 
 declare global {

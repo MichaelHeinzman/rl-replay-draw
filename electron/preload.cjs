@@ -22,4 +22,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   importNote: () => ipcRenderer.invoke("import-note"),
   getOverlayNotes: () => ipcRenderer.invoke("get-overlay-notes"),
   saveOverlayNotes: (notes) => ipcRenderer.invoke("save-overlay-notes", notes),
+  getDisplayBounds: () => ipcRenderer.invoke("get-display-bounds"),
+  quitApp: () => ipcRenderer.send("quit-app"),
 });
