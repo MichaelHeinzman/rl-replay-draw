@@ -24,10 +24,15 @@
       "target": "nsis",
       "icon": "build/icon.ico"
     },
+    "afterSign": "scripts/notarize.cjs",
     "mac": {
       "target": "dmg",
       "icon": "build/icon.icns",
-      "category": "public.app-category.utilities"
+      "category": "public.app-category.utilities",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
     },
     "dmg": {
       "contents": [
@@ -90,6 +95,7 @@
     "typescript": "^5",
     "vite": "^6",
     "vitest": "^4.1.2",
-    "wait-on": "^8"
+    "wait-on": "^8",
+    "@electron/notarize": "^2.5.0"
   }
 }
